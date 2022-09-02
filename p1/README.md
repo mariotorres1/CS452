@@ -11,15 +11,15 @@ in the code. We're essentially hiding files when we run the ls command.
 
 ## Manifest
 
-Makefile - Used to set everything up to run our program
-tesla.h - Header file
-tesla.c - File where our main code is at
-test1 - first set of tests
-test2 - second set of tests
-test3 - third set of tests
-test4 - fourth set of tests
-README.orig - File going through the project and what we need to do
-README.md - This file
+Makefile - Used to set everything up to run our program  
+tesla.h - Header file  
+tesla.c - File where our main code is at  
+test1 - first set of tests  
+test2 - second set of tests  
+test3 - third set of tests  
+test4 - fourth set of tests  
+README.orig - File going through the project and what we need to do  
+README.md - This file  
 
 ## Building the project
 
