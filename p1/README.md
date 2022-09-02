@@ -27,10 +27,9 @@ To build the project, we use the command:
 
 $make
 
-this will give us our .ko file which we will use later
-
-This just gives us the files to run to hide the tesla files, if we do 
-ls right now, all the tesla files will still be there.
+This will give us our .ko file which we will use later. This just gives us 
+the files to run to hide the tesla files, if we do ls right now, all the 
+tesla files will still be there.  
 
 To hide the tesla files, and use our new tesla_getdents function, we run:
 
