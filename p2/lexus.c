@@ -14,10 +14,10 @@
 #include "lexus.h"
 
 MODULE_LICENSE("GPL v2");
-MODULE_AUTHOR("Jidong Xiao"); /* Note: change this line to your name! */
+MODULE_AUTHOR("Mario Torres"); /* Note: change this line to your name! */
 MODULE_DESCRIPTION("CS452 Lexus");
 
-#define DEBUG 1 /* Note: uncomment this line so you can see debug messages in /var/log/messages, or when you run dmesg */
+#define DEBUG 1
 
 /* this integers tracks how many number of tickets we have in total */
 unsigned long nTickets = 0;
@@ -97,7 +97,22 @@ int lexus_schedule(void *data)
 /* handle ioctl system calls */
 static long lexus_dev_ioctl(struct file *filp, unsigned int ioctl, unsigned long arg)
 {
-	return 0;
+  // using struct so I don't have to allocate memory here
+  struct lottery_struct lottery_info;
+  
+  // verifying copy_from_user
+  if (copy_from_user(&lottery_info, (void *)arg, sizeof(struct lottery_struct)) != 0) {
+    return -EACCES;
+  }
+
+  // calling either lexus_register or lexus_unregister based on lotter_info
+  if (ioctl == LEXUS_REGISTER) {
+    lexus_register(lottery_info);
+  } else {
+    lexus_unregister(lottery_info);
+  }
+
+  return 0;
 }
 
 /* gets called when the timer goes off, we then reset the timer so as to make sure
