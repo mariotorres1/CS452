@@ -17,7 +17,7 @@ MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR("Mario Torres"); /* Note: change this line to your name! */
 MODULE_DESCRIPTION("CS452 Lexus");
 
-#define DEBUG 1
+// #define DEBUG 1
 
 /* this integers tracks how many number of tickets we have in total */
 unsigned long nTickets = 0;
