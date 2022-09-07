@@ -79,6 +79,24 @@ void free_lexus_list(void) {
 
 /* register a process into the lottery scheduling system */
 void lexus_register(struct lottery_struct lottery){
+  
+  // Allocate memory
+  struct lexus_task_struct *node = kmalloc(sizeof(lexus_task_struct), GFP_KERNEL);
+
+  // Need to change global variables and list
+  unsigned long flags;
+  spin_lock_irqsave(&lexus_lock, flags);
+
+  // Update variables
+  nTickets += lottery.tickets;
+  node->task = find_task_by_pid(lottery.pid);
+  node->pid = lottery.pid;
+  node->tickets = lottery.tickets;
+  nody->state = READY;
+
+  // Add to list
+  list_add(&(node->list), &(lexus_task_struct.list));
+  spin_unlock_irqrestore(&lexus_lock, flags);
 }
 
 /* unregister a process from the lottery scheduling system */
