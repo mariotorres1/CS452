@@ -14,7 +14,7 @@
 #include "lexus.h"
 
 MODULE_LICENSE("GPL v2");
-MODULE_AUTHOR("Mario Torres"); /* Note: change this line to your name! */
+MODULE_AUTHOR("Mario Torres");
 MODULE_DESCRIPTION("CS452 Lexus");
 
 // #define DEBUG 1
@@ -101,6 +101,30 @@ void lexus_register(struct lottery_struct lottery){
 
 /* unregister a process from the lottery scheduling system */
 void lexus_unregister(struct lottery_struct lottery){
+
+  // Code given in README
+  struct list_head *p, *n;
+  struct lexus_task_struct *node;
+  
+  list_for_each_safe(p, n, &lexus_task_struct.list) {
+    node = list_entry(p, struct lexus_task_struct, list);
+
+    // Added code so we don't delete every node
+    // Verifying that the pid are the same
+    if(node->pid == lottery.pid) {
+      // Update global variabes and list
+      unsigned long flags;
+      spin_lock_irqsave(&lexus_lock, flags);
+      // Delete from list
+      list_del(p);
+      // Free memory
+      kfree(node);
+      // Update current node to be NULL
+      lexus_current = NULL;
+      // Update nTickets, break
+      nTickets -= node->tickets;
+      spin_unlock_irqrestore(&lexus_lock, flags);
+      break;
 }
 
 /* executes a context switch: pick a task and dispatch it to the Linux CFS scheduler */
