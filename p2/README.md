@@ -76,19 +76,32 @@ Test3:
 
 ## Known Bugs
 
-List known bugs that you weren't able to fix (or ran out of time to fix).
+No bugs that were noticeable to my eyes.
 
 ## Reflection and Self Assessment
 
-Discuss the issues you encountered during development and testing. What
-problems did you have? What did you have to research and learn on your
-own? What kinds of errors did you get? How did you fix them?
+This project really challenged me in my ability to see where my issue was and be able 
+to fix that issue. Before this class, I've debugged but nothing to the level of debugging 
+that I've done in the first two projects and I think that it's challenging me quite a 
+bit but I wouldn't say it's a bad thing at all. I enjoy the challenge and hope that it 
+will make me a better programmer from being able to learn this skills/techniques that I 
+really haven't used before hand. I'm really enjoying that aspect of the class thus far.  
 
-What parts of the project did you find challenging? Is there anything that
-finally "clicked" for you in the process of working on this project? How well
-did the development and testing process go for you?
+As far as things that hindered me or took me quite some time to figure out, I'd say the 
+first three functions, lexus_dev_ioctl(), lexus_register(), and lexus_unregister() weren't 
+too difficult. The main issues I had were self inflicted like typos and missing brackets 
+and small things like that. Now, the lexus_schedule() function was a little different 
+story. I was crashing a couple times and that really took me some time to figure out and 
+like I said above, that was my biggest issue, being able to find the problem and knowing 
+how to fix it. I think the slack channel was a very big help here and the lecture material 
+was also a big help. Once, I was able to fix the crashing, I just had touch up issues like 
+I mentioned earlier of typos and missing brackets. I finally figured out how to turn on 
+the ability to highlight matches brackets in emacs and that really helped me. I feel that 
+I'm progressing better than I thought I would at the beginning of the semester and that is 
+something that I'm pretty pumped about.
 
 ## Sources Used
 
-If you used any sources outside of the text book you should list them here. If you looked something up on
-stackoverflow.com and fail to cite it in this section it will be considered plagiarism and be dealt with accordingly. So be safe CITE!
+* Slack channel 
+* Textbook: https://pages.cs.wisc.edu/~remzi/OSTEP/cpu-sched-lottery.pdf
+* Lecture notes
