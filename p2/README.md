@@ -15,15 +15,23 @@ We wrote a Linux kernel module called lexus that implemented a lottery scheduler
 * lexus-test1.sh - First test file
 * lexus-test2.sh - Second test file
 * lexus-test3.sh - Third test file
+* lexus-test.sh - Tests register / unregister functions
 * README.orig - Original README that had project instructions
 * README.md - This file
 
 ## Building the project
 
-This section should tell the user how to build your code.  If you are
-delivering a library, where does it need to be installed or how do you use
-it? Is this an executable, if so how can a user get up to speed as fast
-as possible.
+```console
+$make
+```
+
+``` console
+$sudo insmod lexus.ko
+```
+
+``` console
+$./lexus-test[1-3].sh
+```
 
 ## Features and usage
 
