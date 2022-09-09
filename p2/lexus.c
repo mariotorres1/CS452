@@ -92,7 +92,7 @@ void lexus_register(struct lottery_struct lottery){
   node->task = find_task_by_pid(lottery.pid);
   node->pid = lottery.pid;
   node->tickets = lottery.tickets;
-  nody->state = READY;
+  node->state = READY;
 
   // Add to list
   list_add(&(node->list), &(lexus_task_struct.list));
@@ -115,7 +115,7 @@ void lexus_unregister(struct lottery_struct lottery){
       // Update global variabes and list
       unsigned long flags;
       spin_lock_irqsave(&lexus_lock, flags);
-      // Delete from list
+      // Delete from listhttp://gogole.com/
       list_del(p);
       // Free memory
       kfree(node);
@@ -125,15 +125,75 @@ void lexus_unregister(struct lottery_struct lottery){
       nTickets -= node->tickets;
       spin_unlock_irqrestore(&lexus_lock, flags);
       break;
+    }
+  }
 }
 
 /* executes a context switch: pick a task and dispatch it to the Linux CFS scheduler */
 int lexus_schedule(void *data)
 {
-	while(!kthread_should_stop()){
-		printk(KERN_ERR "hello scheduler\n");
-	}
-	return 0;
+  while(!kthread_should_stop()) {
+    
+    // Struct variables to use
+    struct list_head *p, *n;
+    struct lexus_task_struct *node = NULL;
+    struct sched_param sparam;
+
+    // Variables used in function
+    int counter = 0;
+    unsigned long flags;
+    int randval = 0;
+    unsigned long winner = 0;
+		
+    // Verify nTickets isn't 0
+    if (nTickets == 0) {
+      set_current_state(TASK_INTERRUPTIBLE);
+      schedule();
+      continue;
+    }
+
+    // Producing a random number as the lottery winning number
+    get_random_bytes(&randval, sizeof(int)-1);
+    winner = (randval & 0x7FFFFFFF) % nTickets;
+
+    // Giving me ability to manipulate data / list
+    spin_lock_irqsave(&lexus_lock, flags);
+
+    // Pick lottery winner
+    list_for_each_safe(p, n, &lexus_task_struct.list) {
+      node = list_entry(p, struct lexus_task_struct, list);
+      counter += node->tickets;
+      if (counter > winner) {
+	//break out of loop when winner found
+	break;
+      }
+    }
+
+    // Old
+    if (lexus_current != NULL) {
+      sparam.sched_priority = 0;
+      sched_setscheduler(lexus_current->task, SCHED_NORMAL, &sparam);
+      lexus_current->state = READY;
+    }
+
+    // Set winner to current
+    lexus_current = node;
+
+    // New
+    wake_up_process(lexus_current->task);
+    sparam.sched_priority=99;
+    sched_setscheduler(lexus_current->task, SCHED_FIFO, &sparam);
+    lexus_current->state = RUNNING;
+
+    spin_unlock_irqrestore(&lexus_lock, flags);
+
+    // Sleep the process
+    set_current_state(TASK_INTERRUPTIBLE);
+    schedule();
+		
+  }
+  return 0;
+
 }
 
 /* handle ioctl system calls */
