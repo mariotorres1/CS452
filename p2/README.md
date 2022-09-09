@@ -64,8 +64,14 @@ the register, unregister and ioctl functions.
 
 Here are my results from the tests:
 
-Test1:
+Test1:  
 ![test1](https://user-images.githubusercontent.com/85824580/189268217-f7c18a1e-36e7-4bd1-83b2-87d79e756c56.jpg)
+
+Test2:  
+![test2](https://user-images.githubusercontent.com/85824580/189268323-bbf3ae4e-a7b8-41ba-88c1-ef9a702b394e.PNG)
+
+Test3:  
+![test3](https://user-images.githubusercontent.com/85824580/189268343-4cc9b915-cef3-48f1-bb92-7b69a561be3f.PNG)
 
 
 ## Known Bugs
