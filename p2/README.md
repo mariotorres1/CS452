@@ -65,7 +65,8 @@ the register, unregister and ioctl functions.
 Here are my results from the tests:
 
 Test1:
-![]("C:\Users\mario\Documents\Fall Semester 2022\CS452\p2\test1.jpg")
+![test1](https://user-images.githubusercontent.com/85824580/189268217-f7c18a1e-36e7-4bd1-83b2-87d79e756c56.jpg)
+
 
 ## Known Bugs
 
