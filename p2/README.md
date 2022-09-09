@@ -65,7 +65,7 @@ the register, unregister and ioctl functions.
 Here are my results from the tests:
 
 Test1:
-![](C:\Users\mario\Documents\Fall Semester 2022\CS452\p2\test1.PNG)
+![](C:\Users\mario\Documents\Fall Semester 2022\CS452\p2\test1.jpg)
 
 ## Known Bugs
 
