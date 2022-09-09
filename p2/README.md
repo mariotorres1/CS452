@@ -1,19 +1,22 @@
-## Project Number/Title 
+## Project 2 
 
-* Author: Your Name
-* Class: CS452/CS552 [Operating Systems] Section #num
+* Author: Mario Torres
+* Class: CS452/CS552 [Operating Systems] 
 
 ## Overview
 
-Concisely explain what the program does. If this exceeds a couple of
-sentences, you're going too far. Generally you should be pulling this
-right from the project specification. We don't want you to just cut and
-paste, but paraphrase what is stated in the project specification.
+We wrote a Linux kernel module called lexus that implemented a lottery scheduler.
 
 ## Manifest
 
-A listing of source files and other non-generated files and a brief (one line)
-explanation of the purpose of each file.
+* Makefile - Builds the project
+* lexus.c - Main file in project, has lottery schedule implementation
+* lexus.h - Header file
+* lexus-test1.sh - First test file
+* lexus-test2.sh - Second test file
+* lexus-test3.sh - Third test file
+* README.orig - Original README that had project instructions
+* README.md - This file
 
 ## Building the project
 
