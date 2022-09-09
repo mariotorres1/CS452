@@ -21,28 +21,51 @@ We wrote a Linux kernel module called lexus that implemented a lottery scheduler
 
 ## Building the project
 
-```console
+Run make to build the project: 
+``` console
 $make
 ```
 
+Import the module we created:
 ``` console
 $sudo insmod lexus.ko
 ```
 
+Test:
 ``` console
 $./lexus-test[1-3].sh
 ```
 
+Remove the module:
+``` console
+$sudo rmmod lexus
+```
+
 ## Features and usage
 
-Summarize the main features of your program. It is also appropriate to
-instruct the user how to use your program.
+The main features of the project were the lexus_dev_ioctl(), 
+lexus_register(), lexus_unregister(), and lexus_schedule() functions. Each
+function was implemented by me based on lectures and the textbook for the 
+class. The lexus_dev_ioctl() function handles the calling of either the 
+lexus_register() function or the lexus_unregister() function depending on 
+what is passed. The lexus_register() function handles processes that want to 
+be registered and added into the lottery scheduling that I created. The lexus_unregister 
+does the opposite and removes a process from the lottery scheduling. Finally, 
+the lexus_schedule() function does the main work of the lottery scheduling. 
 
 ## Testing
 
-This section should detail how you tested your code. Simply stating "I ran
-it a few times and it seems to work" is not sufficient. Your testing needs to
-be detailed here.
+Most of the testing I did with this project was running the given tests that 
+were provided when we were assigned this project. From there, I had issues with 
+it crashing a couple times and I would comment code and slowly uncomment the code 
+to see where the crash was happening and I would fix the issue. I also used the debug 
+possibilities that were also provided within the code and that really helped with 
+the register, unregister and ioctl functions.
+
+Here are my results from the tests:
+
+Test1:
+![Image](C:\Users\mario\Documents\Fall Semester 2022\CS452\p2\test1.PNG)
 
 ## Known Bugs
 
