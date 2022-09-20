@@ -39,7 +39,32 @@ int buddy_init(void) {
 
 void *buddy_malloc(size_t size)
 {
-	return NULL;
+	// Verify that buddy_init() was called
+	if (base == NULL) {
+		return NULL;
+	}
+
+	// Variables
+	int r, i, j;
+	struct block_header *p, *p2, *p3, *new;
+	int lgSize = 0;
+	int free = FREE;
+	void *retVal;
+
+	// Add header size to size
+	size += sizeof(struct block_header);
+	size -= 1;
+
+	// Figuring out lgSize
+	while (size > 0) {
+		size = size >> 1;
+		lgSize++;
+	}
+
+	// verify lgSize size
+	if (lgSize > 29) {
+		return NULL;
+	}
 }
 
 void buddy_free(void *ptr) 
