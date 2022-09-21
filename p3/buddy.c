@@ -7,6 +7,8 @@
 #include "buddy.h"
 
 int buddy_init(void) { 
+	// Variables
+	int i;
 	// Getting size of memory
 	base = sbrk(DEFAULT_MAX_MEM_SIZE);
 
@@ -14,7 +16,7 @@ int buddy_init(void) {
 	struct block_header *p = (struct block_header *) base;
 
 	// Update information for each array position
-	for (int i = 0; i <= 29; i++) {
+	for (i = 0; i <= 29; i++) {
 		// Updating final position's information
 		if (i == 29) {
 			avail[i].next = p;
@@ -127,7 +129,7 @@ void *buddy_malloc(size_t size) {
 		j--;
 
 		// Making new header
-		new = (struct block_header *)(base + r);
+		new = (struct block_header *)((long)base + r);
 
 		// Adjusting values
 		p->kval = j;
