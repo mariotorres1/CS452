@@ -196,8 +196,32 @@ void buddy_free(void *ptr) {
 	
 }
 
-void printBuddyLists(void)
-{
+void printBuddyLists(void) {
+	// Variables
+	int i;
+	int count = 0;
+	struct block_header *p, *s;
+
+	// Looping through each list
+	for (i = 0; i < 30; i++) {
+		p = &avail[i];
+		s = p;
+		printf("List %d: head = %p", i, p);
+		while (1) {
+			p = p->next;
+			if (p == s) {
+				printf(" --> head = %p", p);
+				break;
+			} else {
+				printf(" --> [tag=%d, kval=%d, addr=%p]", p->tag, p->kval, p);
+				if (p->tag == FREE) {
+					count++;
+				}
+			}
+		}
+		printf("\n");
+	}
+	printf("\nNumber of available blocks = %d \n", count);
 }
 
 /* vim: set ts=4: */
