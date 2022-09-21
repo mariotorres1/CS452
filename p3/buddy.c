@@ -70,12 +70,14 @@ void *buddy_malloc(size_t size) {
 	// Start looking for available block
 	for (i = lgSize; i < 30; i++) {
 		p = &avail[i];
+		printf("%d", i);
 		while (p->next->tag != UNUSED) {
 			p = p->next;
 			if (p->tag == FREE) {
 				free = TRUE;
 				break;
 			}
+			printf("%d", p);
 		}
 		if (free) {
 			break;
