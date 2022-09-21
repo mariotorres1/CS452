@@ -37,8 +37,7 @@ int buddy_init(void) {
 	return TRUE;
 }
 
-void *buddy_malloc(size_t size)
-{
+void *buddy_malloc(size_t size) {
 	// Verify that buddy_init() was called
 	if (base == NULL) {
 		return NULL;
@@ -152,8 +151,47 @@ void *buddy_malloc(size_t size)
 	return retVal;
 }
 
-void buddy_free(void *ptr) 
-{
+void buddy_free(void *ptr) {
+	// Variables
+	struct block_header *p1;
+	struct block_header *p2;
+	long x, y;
+	
+	// Assigning variables
+	p1 = (struct block_header *) ((char *)ptr - sizeof(struct block_header));
+	x = (long)p1 - (long)base;
+	y = (unsigned long long)(x)^(1ULL<<(p1->kval));
+	p2 = (struct block_header *)((long)p1 + (long)y);
+
+	// Looking to free blocks
+	while (p2->tag == FREE && p2->kval == p1->kval) {
+		// Adjust p2 data
+		struct block_header *t1, *t2;
+		t1 = p2->prev;
+		t2 = p2->next;
+		t1->next = t2;
+		t2->prev = t1;
+
+		// Increment kval and try to find next buddy
+		p1->kval = (short)p1->kval + 1;
+
+		// Find buddy address
+		y = (unsigned long long)(x)^(1ULL<<(p1->kval));
+		p2 = (struct block_header *)((long)p1 + (long)y);
+	}
+
+	if (p1 > p2 && p1->kval != 29) {
+		p1 = p2;
+	}
+
+	// Adjusting pointers
+	p1->tag = FREE;
+	struct block_header *t = avail[p1->kval].next;
+	avail[p1->kval].next = p1;
+	t->prev = p1;
+	p1->prev = &avail[p1->kval];
+	p1->next = t;
+	
 }
 
 void printBuddyLists(void)
