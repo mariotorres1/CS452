@@ -22,14 +22,20 @@ using the buddy-system.
 ## Building the project
 
 We first need to build all the files by running make: 
-'$make'
+``` console
+  $make
+```
 
 Then we can run the buddy-unit-test files:
-'$buddy-unit-test [s | t | v | i]'
+``` console
+  $buddy-unit-test [s | t | v | i]
+```
 
 Finally, we can run the buddy-test and malloc tests:
-'$buddy-test <num of tests> [random seed] [s | t | v | i]'
-'$malloc-test <num of tests> [random seed] [s | t | v | i]'
+``` console
+  $buddy-test <num of tests> [random seed] [s | t | v | i]
+  $malloc-test <num of tests> [random seed] [s | t | v | i]
+```
   
 We can also time those tests by using:
 ``` console
