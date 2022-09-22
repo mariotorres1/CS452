@@ -1,26 +1,39 @@
-## Project Number/Title 
+## Project 3
 
-* Author: Your Name
-* Class: CS452/CS552 [Operating Systems] Section #num
+* Author: Mario Torres
+* Class: CS452/CS552 [Operating Systems]
 
 ## Overview
 
-Concisely explain what the program does. If this exceeds a couple of
-sentences, you're going too far. Generally you should be pulling this
-right from the project specification. We don't want you to just cut and
-paste, but paraphrase what is stated in the project specification.
+We implement the buddy-system. We create our own malloc and free functions 
+using the buddy-system.
 
 ## Manifest
 
-A listing of source files and other non-generated files and a brief (one line)
-explanation of the purpose of each file.
+* Makefile - Creates the executibles
+* buddy.c - File we implement our new functions
+* buddy.h - Header file
+* malloc-test.c - Uses the original malloc and free functions to test data
+* buddy-test.c - Uses our new buddy_malloc and buddy_free functions to test data
+* buddy-unit-test.c - Mainly tests our new malloc function
+* README.orig - Original README with project instructions
+* README.md - This file
 
 ## Building the project
 
-This section should tell the user how to build your code.  If you are
-delivering a library, where does it need to be installed or how do you use
-it? Is this an executable, if so how can a user get up to speed as fast
-as possible.
+We first need to build all the files by running make: 
+'$make'
+
+Then we can run the buddy-unit-test files:
+'$buddy-unit-test [s | t | v | i]'
+
+Finally, we can run the buddy-test and malloc tests:
+'$buddy-test <num of tests> [random seed] [s | t | v | i]'
+'$malloc-test <num of tests> [random seed] [s | t | v | i]'
+  
+We can also time those tests by using:
+'$time buddy-test <num of tests> [random seed] [s | t | v | i]'
+'$time malloc-test <num of tests> [random seed] [s | t | v | i]'
 
 ## Features and usage
 
