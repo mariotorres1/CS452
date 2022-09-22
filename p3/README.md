@@ -32,8 +32,10 @@ Finally, we can run the buddy-test and malloc tests:
 '$malloc-test <num of tests> [random seed] [s | t | v | i]'
   
 We can also time those tests by using:
-'$time buddy-test <num of tests> [random seed] [s | t | v | i]'
-'$time malloc-test <num of tests> [random seed] [s | t | v | i]'
+``` console
+  $time buddy-test <num of tests> [random seed] [s | t | v | i]
+  $time malloc-test <num of tests> [random seed] [s | t | v | i]
+```
 
 ## Features and usage
 
