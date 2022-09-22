@@ -50,7 +50,7 @@ void *buddy_malloc(size_t size) {
 	struct block_header *p, *p2, *p3, *new;
 	int lgSize = 0;
 	int free = FALSE;
-	void *retVal;
+	void* retVal;
 
 	// Add header size to size
 	size += sizeof(struct block_header);
@@ -129,7 +129,7 @@ void *buddy_malloc(size_t size) {
 		j--;
 		
 		// Making new header
-		new = (struct block_header *)(base + r);
+		new = (struct block_header *)((long)base + r);
 
 		// Adjusting values
 		p->kval = j;
