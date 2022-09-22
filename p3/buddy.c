@@ -28,7 +28,7 @@ int buddy_init(void) {
 		avail[i].prev = &avail[i];
 		avail[i].kval = i;
 		avail[i].tag = UNUSED;
-	}	
+	}
 
 	// Updating the headers information
 	p->next = &avail[29];
@@ -44,12 +44,12 @@ void *buddy_malloc(size_t size) {
 	if (base == NULL) {
 		return NULL;
 	}
-
+	
 	// Variables
 	int r, i, j;
 	struct block_header *p, *p2, *p3, *new;
 	int lgSize = 0;
-	int free = FREE;
+	int free = FALSE;
 	void *retVal;
 
 	// Add header size to size
@@ -60,7 +60,7 @@ void *buddy_malloc(size_t size) {
 	while (size > 0) {
 		size = size >> 1;
 		lgSize++;
-	}
+    }
 
 	// Verify lgSize size
 	if (lgSize > 29) {
@@ -70,18 +70,16 @@ void *buddy_malloc(size_t size) {
 	// Start looking for available block
 	for (i = lgSize; i < 30; i++) {
 		p = &avail[i];
-		printf("%d", i);
 		while (p->next->tag != UNUSED) {
 			p = p->next;
 			if (p->tag == FREE) {
 				free = TRUE;
 				break;
 			}
-			printf("%d", p);
 		}
 		if (free) {
 			break;
-		}
+	}
 	}
 
 	// Verify that something was found
@@ -116,7 +114,7 @@ void *buddy_malloc(size_t size) {
 		if (p->next != NULL && p->prev != NULL) {
 			p2 = p->prev;
 			p3 = p->next;
-
+			
 			p2->next = p3;
 			p3->prev = p2;
 
@@ -129,9 +127,9 @@ void *buddy_malloc(size_t size) {
 		// Adjust r and j
 		r = r >> 1;
 		j--;
-
+		
 		// Making new header
-		new = (struct block_header *)((long)base + r);
+		new = (struct block_header *)(base + r);
 
 		// Adjusting values
 		p->kval = j;
@@ -141,7 +139,7 @@ void *buddy_malloc(size_t size) {
 		// Adding to linked list
 		p2 = &avail[j];
 		p3 = p2->next;
-
+		
 		// Adjusting pointers
 		p2->next = new;
 		new->prev = p2;
@@ -151,7 +149,7 @@ void *buddy_malloc(size_t size) {
 
 	// retVal
 	retVal = (void *)((char *)p + sizeof(struct block_header));
-	
+
 	return retVal;
 }
 
@@ -166,7 +164,7 @@ void buddy_free(void *ptr) {
 	x = (long)p1 - (long)base;
 	y = (unsigned long long)(x)^(1ULL<<(p1->kval));
 	p2 = (struct block_header *)((long)p1 + (long)y);
-
+	
 	// Looking to free blocks
 	while (p2->tag == FREE && p2->kval == p1->kval) {
 		// Adjust p2 data
@@ -175,7 +173,7 @@ void buddy_free(void *ptr) {
 		t2 = p2->next;
 		t1->next = t2;
 		t2->prev = t1;
-
+		
 		// Increment kval and try to find next buddy
 		p1->kval = (short)p1->kval + 1;
 
@@ -187,7 +185,7 @@ void buddy_free(void *ptr) {
 	if (p1 > p2 && p1->kval != 29) {
 		p1 = p2;
 	}
-
+	
 	// Adjusting pointers
 	p1->tag = FREE;
 	struct block_header *t = avail[p1->kval].next;
@@ -218,7 +216,7 @@ void printBuddyLists(void) {
 				printf(" --> [tag=%d, kval=%d, addr=%p]", p->tag, p->kval, p);
 				if (p->tag == FREE) {
 					count++;
-				}
+			}
 			}
 		}
 		printf("\n");
