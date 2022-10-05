@@ -44,8 +44,25 @@ int is_entire_table_free(unsigned long table){
  * */
 
 int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr_t fault_addr, u32 error_code) {
-	printk("Page fault!\n");
-    return -1;
+	// Variables 
+	unsigned long pm14_table, pdp_table, pd_table, pt_table;
+	unsigned long *pm14e, *pdpte, *pde, *pte;
+	unsigned long cr3;
+
+	// Verifying address is valid
+	if (is_valid_address(infiniti_vma, fault_addr) == 0 ) {
+		return -1;
+	}
+
+	// Verifying error code
+	if (error_code == SEGV_ACCERR) {
+		return -1;
+	}
+
+	// Updating cr3, pm14_table and pm143 variables
+	cr3 = get_cr3();
+	pm14_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
+	pm14e = (unsigned long *)(pm14_table + (unsigned long)(((fault_addr >> 39) & 0x01ff) << 3));
 }
 
 /* this function takes a user VA and free its PA as well as its kernel va. */
