@@ -45,8 +45,8 @@ int is_entire_table_free(unsigned long table){
 
 int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr_t fault_addr, u32 error_code) {
 	// Variables 
-	unsigned long pm14_table, pdp_table, pd_table, pt_table;
-	unsigned long *pm14e, *pdpte, *pde, *pte;
+	unsigned long pml4_table, pdp_table, pd_table, pt_table;
+	unsigned long *pml4e, *pdpte, *pde, *pte;
 	unsigned long cr3;
 
 	// Verifying address is valid
@@ -59,31 +59,31 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 		return -1;
 	}
 
-	// Updating cr3, pm14_table and pm143 variables
+	// Updating cr3, pml4_table and pml4e variables
 	cr3 = get_cr3();
-	pm14_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
-	pm14e = (unsigned long *)(pm14_table + (unsigned long)(((fault_addr >> 39) & 0x01ff) << 3));
+	pml4_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
+	pml4e = (unsigned long *)(pml4_table + (unsigned long)(((fault_addr >> 39) & 0x01ff) << 3));
 
-	if (*pm14e & 0x1) {
+	if (*pml4e & 0x1) {
 	} else {
 		uintptr_t kernel_addr = 0;
-		kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+		kernel_addr = (uintptr_t)get_zeroed_page(GFP_KERNEL);
 		
 		if (!kernel_addr) {
 			return -ENOMEM;
 		}
 		
-		*pm14e = (unsigned long)((unsigned long)*pm14e | 0x7);
-		*pm14e = (unsigned long)(*pm14e | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
+		*pml4e = (unsigned long)((unsigned long)*pml4e | 0x7);
+		*pml4e = (unsigned long)(*pml4e | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
 	}
 
-	pdp_table = (unsigned long)__va(*pm14e & 0x000FFFFFFFFFF000);
+	pdp_table = (unsigned long)__va(*pml4e & 0x000FFFFFFFFFF000);
     pdpte = (unsigned long *)(pdp_table + (unsigned long)(((fault_addr >> 30) & 0x01ff) << 3));
 
     if (*pdpte & 0x1) {
     } else {
         uintptr_t kernel_addr = 0;
-        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+        kernel_addr = (uintptr_t)get_zeroed_page(GFP_KERNEL);
 
         if (!kernel_addr) {
             return -ENOMEM;
@@ -99,7 +99,7 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
     if (*pde & 0x1) {
     } else {
         uintptr_t kernel_addr = 0;
-        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+        kernel_addr = (uintptr_t)get_zeroed_page(GFP_KERNEL);
 
         if (!kernel_addr) {
             return -ENOMEM;
@@ -115,7 +115,7 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
     if (*pte & 0x1) {
     } else {
         uintptr_t kernel_addr = 0;
-        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+        kernel_addr = (uintptr_t)get_zeroed_page(GFP_KERNEL);
 
         if (!kernel_addr) {
             return -ENOMEM;
@@ -132,15 +132,75 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 /* this function takes a user VA and free its PA as well as its kernel va. */
 void infiniti_free_pa(uintptr_t user_addr){
 	// Variables
-	unsigned long pm14_table, pdp_table, pd_table, pt_table;
-	unsigned long *pm14e, *pdpte, *pde, *pte;
+	unsigned long pml4_table, pdp_table, pd_table, pt_table;
+	unsigned long *pml4e, *pdpte, *pde, *pte;
 	unsigned long cr3;
 	unsigned long kernel_addr;
 
-	// Update variables
+	// Update cr3, pml4_table, and pml4e variables
 	cr3 = get_cr3();
-	pm14_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
-	pm14e = (unsigned long *)(pm14_table + (unsigned long)(((user_addr >> 39) & 0x01ff) << 3));
+	pml4_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
+	pml4e = (unsigned long *)(pml4_table + (unsigned long)(((user_addr >> 39) & 0x01ff) << 3));
+
+	if (*pml4e & 0x1) {
+	} else {
+		return;
+	}
+
+	pdp_table = (unsigned long)__va(*pml4e & 0x000FFFFFFFFFF000);
+	pdpte = (unsigned long *)(pdp_table + (unsigned long)(((user_addr >> 30) & 0x01ff) << 3));
+
+	if (*pdpte & 0x1) {
+	} else {
+		return;
+	}
+
+    pd_table = (unsigned long)__va(*pdpte & 0x000FFFFFFFFFF000);
+    pde = (unsigned long *)(pd_table + (unsigned long)(((user_addr >> 21) & 0x01ff) << 3));
+
+    if (*pde & 0x1) {
+    } else {
+        return;
+    }
+
+    pt_table = (unsigned long)__va(*pde & 0x000FFFFFFFFFF000);
+    pte = (unsigned long *)(pt_table + (unsigned long)(((user_addr >> 32) & 0x01ff) << 3));
+
+    if (*pte & 0x1) {
+    } else {
+        return;
+    }
+
+	kernel_addr = (unsigned long)__va(*pte & 0x000ffffffffff000) + (user_addr & 0xfff);
+	free_page(kernel_addr);
+
+	*pte = 0;
+	if (is_entire_table_free(pt_table)) {
+		free_page(pt_table);
+	} else {
+		return;
+	}
+
+	*pde = 0;
+    if (is_entire_table_free(pd_table)) {
+        free_page(pd_table);
+    } else {
+        return;
+    }
+
+	*pdpte = 0;
+    if (is_entire_table_free(pdp_table)) {
+        free_page(pdp_table);
+    } else {
+        return;
+    }
+
+	*pml4e = 0;
+    if (is_entire_table_free(pml4_table)) {
+        free_page(pml4_table);
+    } else {
+        return;
+    }
 }
 
 /* vim: set ts=4: */
