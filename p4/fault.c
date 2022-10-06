@@ -131,7 +131,16 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 
 /* this function takes a user VA and free its PA as well as its kernel va. */
 void infiniti_free_pa(uintptr_t user_addr){
-	return;
+	// Variables
+	unsigned long pm14_table, pdp_table, pd_table, pt_table;
+	unsigned long *pm14e, *pdpte, *pde, *pte;
+	unsigned long cr3;
+	unsigned long kernel_addr;
+
+	// Update variables
+	cr3 = get_cr3();
+	pm14_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
+	pm14e = (unsigned long *)(pm14_table + (unsigned long)(((user_addr >> 39) & 0x01ff) << 3));
 }
 
 /* vim: set ts=4: */
