@@ -137,7 +137,7 @@ void infiniti_free_pa(uintptr_t user_addr){
 	unsigned long cr3;
 	unsigned long kernel_addr;
 
-	// Update cr3, pml4_table, and pml4e variables
+	// Updating cr3, pml4_table, and plm4e variables
 	cr3 = get_cr3();
 	pml4_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
 	pml4e = (unsigned long *)(pml4_table + (unsigned long)(((user_addr >> 39) & 0x01ff) << 3));
@@ -148,28 +148,28 @@ void infiniti_free_pa(uintptr_t user_addr){
 	}
 
 	pdp_table = (unsigned long)__va(*pml4e & 0x000FFFFFFFFFF000);
-	pdpte = (unsigned long *)(pdp_table + (unsigned long)(((user_addr >> 30) & 0x01ff) << 3));
+	pdpte = (unsigned long *)(pdp_table + (unsigned long)(((user_addr >> 30)&0x01ff) << 3));
 
 	if (*pdpte & 0x1) {
 	} else {
 		return;
 	}
 
-    pd_table = (unsigned long)__va(*pdpte & 0x000FFFFFFFFFF000);
-    pde = (unsigned long *)(pd_table + (unsigned long)(((user_addr >> 21) & 0x01ff) << 3));
+	pd_table = (unsigned long)__va(*pdpte & 0x000FFFFFFFFFF000);
+	pde = (unsigned long *)(pd_table + (unsigned long)(((user_addr >> 21)&0x01ff) << 3));
 
-    if (*pde & 0x1) {
-    } else {
-        return;
-    }
+	if (*pde & 0x1) {
+	} else {
+		return;
+	}
 
-    pt_table = (unsigned long)__va(*pde & 0x000FFFFFFFFFF000);
-    pte = (unsigned long *)(pt_table + (unsigned long)(((user_addr >> 32) & 0x01ff) << 3));
+	pt_table = (unsigned long)__va(*pde & 0x000FFFFFFFFFF000);
+	pte = (unsigned long *)(pt_table + (unsigned long)(((user_addr >> 12)&0x01ff) << 3));
 
-    if (*pte & 0x1) {
-    } else {
-        return;
-    }
+	if (*pte & 0x1) {
+	} else {
+		return;
+	}
 
 	kernel_addr = (unsigned long)__va(*pte & 0x000ffffffffff000) + (user_addr & 0xfff);
 	free_page(kernel_addr);
@@ -182,25 +182,25 @@ void infiniti_free_pa(uintptr_t user_addr){
 	}
 
 	*pde = 0;
-    if (is_entire_table_free(pd_table)) {
-        free_page(pd_table);
-    } else {
-        return;
-    }
+	if (is_entire_table_free(pd_table)) {
+		free_page(pd_table);
+	} else{
+		return;
+	}
 
 	*pdpte = 0;
-    if (is_entire_table_free(pdp_table)) {
-        free_page(pdp_table);
-    } else {
-        return;
-    }
+	if (is_entire_table_free(pdp_table)) {
+		free_page(pdp_table);
+	} else {
+		return;
+	}
 
 	*pml4e = 0;
-    if (is_entire_table_free(pml4_table)) {
-        free_page(pml4_table);
-    } else {
-        return;
-    }
+	if (is_entire_table_free(pml4_table)) {
+		free_page(pml4_table);
+	} else {
+		return;
+	}
 }
 
 /* vim: set ts=4: */
