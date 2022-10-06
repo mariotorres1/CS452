@@ -63,6 +63,70 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 	cr3 = get_cr3();
 	pm14_table = (unsigned long)__va(cr3 & 0x000FFFFFFFFFF000);
 	pm14e = (unsigned long *)(pm14_table + (unsigned long)(((fault_addr >> 39) & 0x01ff) << 3));
+
+	if (*pm14e & 0x1) {
+	} else {
+		uintptr_t kernel_addr = 0;
+		kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+		
+		if (!kernel_addr) {
+			return -ENOMEM;
+		}
+		
+		*pm14e = (unsigned long)((unsigned long)*pm14e | 0x7);
+		*pm14e = (unsigned long)(*pm14e | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
+	}
+
+	pdp_table = (unsigned long)__va(*pm14e & 0x000FFFFFFFFFF000);
+    pdpte = (unsigned long *)(pdp_table + (unsigned long)(((fault_addr >> 30) & 0x01ff) << 3));
+
+    if (*pdpte & 0x1) {
+    } else {
+        uintptr_t kernel_addr = 0;
+        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+
+        if (!kernel_addr) {
+            return -ENOMEM;
+        }
+
+        *pdpte = (unsigned long)((unsigned long)*pdpte | 0x7);
+        *pdpte = (unsigned long)(*pdpte | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
+    }
+
+    pd_table = (unsigned long)__va(*pdpte & 0x000FFFFFFFFFF000);
+    pde = (unsigned long *)(pd_table + (unsigned long)(((fault_addr >> 21) & 0x01ff) << 3));
+
+    if (*pde & 0x1) {
+    } else {
+        uintptr_t kernel_addr = 0;
+        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+
+        if (!kernel_addr) {
+            return -ENOMEM;
+        }
+
+        *pde = (unsigned long)((unsigned long)*pde | 0x7);
+        *pde = (unsigned long)(*pde | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
+    }
+
+    pt_table = (unsigned long)__va(*pde & 0x000FFFFFFFFFF000);
+    pte = (unsigned long *)(pt_table + (unsigned long)(((fault_addr >> 12) & 0x01ff) << 3));
+
+    if (*pte & 0x1) {
+    } else {
+        uintptr_t kernel_addr = 0;
+        kernel_addr = (uinptr_t)get_zeroed_page(GFP_KERNEL);
+
+        if (!kernel_addr) {
+            return -ENOMEM;
+        }
+
+        *pte = (unsigned long)((unsigned long)*pte | 0x7);
+        *pte = (unsigned long)(*pte | ((unsigned long)__pa(kernel_addr) & (unsigned long)0xffffffffff000));
+    }
+
+	return 0;
+
 }
 
 /* this function takes a user VA and free its PA as well as its kernel va. */
