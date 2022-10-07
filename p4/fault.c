@@ -81,7 +81,7 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 	}
 
 	// Updating pdp_table pdpte variables
-	pdp_table = (unsigned long)__va(*pml4e & 0x000FFFFFFFFFF000);
+		pdp_table = (unsigned long)__va(*pml4e & 0x000FFFFFFFFFF000);
     	pdpte = (unsigned long *)(pdp_table + (unsigned long)(((fault_addr >> 30) & 0x01ff) << 3));
 
 	// Checking the present bit of pdpte
@@ -125,7 +125,7 @@ int infiniti_do_page_fault(struct infiniti_vm_area_struct *infiniti_vma, uintptr
 	    pte = (unsigned long *)(pt_table + (unsigned long)(((fault_addr >> 12) & 0x01ff) << 3));
 
 	// Checking the present bit of pte
-	    if (*pte & 0x1) 
+	    if (*pte & 0x1) { 
 		    // If it's 1, do nothing
 	    } else {
 		/* If not 1, allocate table and update pte to show that */
