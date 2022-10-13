@@ -9,7 +9,30 @@
 #include "mergesort.h"
 
 /* this function will be called by mergesort() and also by parallel_mergesort(). */
-void merge(int leftstart, int leftend, int rightstart, int rightend){
+void merge(int leftstart, int leftend, int rightstart, int rightend) {
+		// Variables
+		int size = rightend - leftstart + 1;
+		int i = leftstart;
+		int left = leftstart;
+		int right = rightstart;
+
+		// Loop through
+		while (left <= leftend && right <= rightend) {
+				// Making sure leftstart isn't past rightstart
+				if (A[left] <= A[right]) {
+						B[i] = A[left];
+						left++;
+				} else {
+						B[i] = A[right];
+						right++;
+				}
+				i++;
+		}
+
+		// memcopy
+		memcpy(&B[i], &A[left], (leftend - left + 1) * sizeof(int));
+		memcpy(&B[i], &A[right], (rightend - right + 1) * sizeof(int));
+		memcpy(&A[leftstart], &B[leftstart], size * sizeof(int));
 }
 
 /* this function will be called by parallel_mergesort() as its base case. */
