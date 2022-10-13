@@ -1,6 +1,6 @@
 /**
  * This file implements parallel mergesort.
- * Author: Jidong Xiao // Change this line to your name.
+ * Author: Mario Torres
  */
 
 #include <stdio.h>
