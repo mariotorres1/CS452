@@ -36,7 +36,19 @@ void merge(int leftstart, int leftend, int rightstart, int rightend) {
 }
 
 /* this function will be called by parallel_mergesort() as its base case. */
-void mergesort(int left, int right){
+void mergesort(int left, int right) {
+		// Base case
+		if (left >= right) {
+				return;
+		}
+
+		// Break in half and call recursively 
+		int middle = (left + right) / 2;
+		mergesort(left, middle);
+		mergesort(middle + 1, right);
+		
+		// Merge
+		merge(left, middle, middle + 1, right);
 }
 
 /* this function will be called by the testing program. */
