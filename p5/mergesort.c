@@ -22,8 +22,16 @@ void * parallel_mergesort(void *arg){
 }
 
 /* we build the argument for the parallel_mergesort function. */
-struct argument * buildArgs(int left, int right, int level){
-		return NULL;
+struct argument * buildArgs(int left, int right, int level) {
+		// Create struct 
+		struct argument * arg = (struct argument *)malloc(sizeof(struct argument));
+		// Update arg values
+		arg->left = left;
+		arg->right = right;
+		arg->level = level;
+
+		// Return arg
+		return arg;
 }
 
 /* vim: set ts=4: */
