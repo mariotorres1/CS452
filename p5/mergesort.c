@@ -52,7 +52,49 @@ void mergesort(int left, int right) {
 }
 
 /* this function will be called by the testing program. */
-void * parallel_mergesort(void *arg){
+void * parallel_mergesort(void *arg) {
+		// Variables
+		pthread_t t1, t2;
+		struct argument *arg1, *arg2, *orig;
+
+		// Assign value to orig
+		orig = (struct argument *)arg;
+
+		// Checking to see if level is equal to cutoff
+		if (orig->level == cutoff) {
+				// Call mergesort
+				mergesort(orig->left, orig->right);
+				// Return null
+				return NULL;
+		}
+
+		// Verifying left is not greater than or equal to right
+		if (orig->left >= orig->right) {
+				// Return null
+				return NULL;
+		}
+
+		// Geting middle
+		int middle = (orig->left + orig->right) / 2;
+		
+		// Updating arg1 and arg2 for recursion call
+		arg1 = buildArgs(orig->left, middle, orig->level + 1);
+		arg2 = buildArgs(middle + 1, orig->right, orig->level + 1);
+
+		// Recursion
+		pthread_create(&t1, NULL, parallel_mergesort, arg1);
+		pthread_create(&t2, NULL, parallel_mergesort, arg2);
+
+		// Join and merge
+		pthread_join(t1, NULL);
+		pthread_join(t2, NULL);
+		merge(arg1->left, arg1->right, arg2->left, arg2->right);
+
+		// Free memory
+		free(arg1);
+		free(arg2);
+
+		// Return null
 		return NULL;
 }
 
