@@ -155,6 +155,32 @@ void producer(int fd) {
 
 /* */
 void *consumer(void *ptr) {
+	// Variables
+	struct node *node;
+	struct item *item;
+	struct list *list;
+
+	list = createList(compareToItem, toStringItem, freeItem);
+
+	while (1) {
+		
+		pthread_mutex_lock(&m);
+		while (list->size == 0) {
+			pthread_cond_wait(&c, &m);
+		}
+		pthread_mutex_unlock(&m);
+
+		node = removeFront(list);
+		if (node) {
+			item = (struct item *)(node->obj);
+
+			request_handle(item->fd);
+			close(item->fd);
+
+			freeNode(node, freeItem);
+		}
+		return NULL;
+	}
 }
 
 int main(int argc, char *argv[]) {
