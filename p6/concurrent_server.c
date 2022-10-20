@@ -23,6 +23,10 @@
 #include <List.h>
 
 char default_root[] = ".";
+int capacity = 5;
+
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t c = PTHREAD_COND_INITIALIZER;
 
 #define MAXBUF (8192)
 
@@ -125,6 +129,32 @@ void request_handle(int fd) {
 		/* parent just waits for the child to finish */
 		wait(NULL);
     }
+}
+
+
+/* */
+void producer(int fd) {
+	// Variables
+	struct item *item;
+	struct node *node;
+	struct list *list;
+
+	// Update list variable
+	list = createList(compareToItem, toStringItem, freeItem);
+
+	while (list->size >= capacity) {
+		if (list->size == capacity) {
+			pthread_cond_wait(&c, &m);
+		}
+
+		item = createItem(fd, 1);
+		node = createNode(item);
+		addAtRear(list, node);
+	}
+}
+
+/* */
+void *consumer(void *ptr) {
 }
 
 int main(int argc, char *argv[]) {
