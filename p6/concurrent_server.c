@@ -23,10 +23,14 @@
 #include <List.h>
 
 char default_root[] = ".";
-int capacity = 5;
 
-pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t c = PTHREAD_COND_INITIALIZER;
+// Varables added
+int capacity = 5;
+struct list *list;
+
+pthread_mutex_t m;
+pthread_cond_t c;
+pthread_t *ctids;
 
 #define MAXBUF (8192)
 
@@ -137,20 +141,20 @@ void producer(int fd) {
 	// Variables
 	struct item *item;
 	struct node *node;
-	struct list *list;
 
-	// Update list variable
-	list = createList(compareToItem, toStringItem, freeItem);
+	pthread_mutex_lock(&m);
 
 	while (list->size >= capacity) {
-		if (list->size == capacity) {
-			pthread_cond_wait(&c, &m);
-		}
-
-		item = createItem(fd, 1);
-		node = createNode(item);
-		addAtRear(list, node);
+		pthread_cond_wait(&c, &m);
 	}
+
+	item = createItem(fd, 1);
+	node = createNode(item);
+
+	addAtRear(list, node);
+	
+	pthread_mutex_unlock(&m);
+
 }
 
 /* */
@@ -158,22 +162,18 @@ void *consumer(void *ptr) {
 	// Variables
 	struct node *node;
 	struct item *item;
-	struct list *list;
-
-	list = createList(compareToItem, toStringItem, freeItem);
 
 	while (1) {
-		
 		pthread_mutex_lock(&m);
 		while (list->size == 0) {
 			pthread_cond_wait(&c, &m);
 		}
+		node = removeFront(list);
 		pthread_mutex_unlock(&m);
 
-		node = removeFront(list);
 		if (node) {
 			item = (struct item *)(node->obj);
-
+			
 			request_handle(item->fd);
 			close(item->fd);
 
@@ -184,21 +184,28 @@ void *consumer(void *ptr) {
 }
 
 int main(int argc, char *argv[]) {
-    int c;
+    int c, i;
     char *root_dir = default_root;
     int port = 10000;
+	int consumer_threads;
     
-    while ((c = getopt(argc, argv, "p:")) != -1){
+    while ((c = getopt(argc, argv, "p:t:")) != -1){
 		switch (c) {
 		/* the user specifies port number. the web server will then listen on this port. */
 		case 'p':
 	    	port = atoi(optarg);
 	    	break;
+		case 't':
+			consumer_threads = atoi(optarg);
+			break;
 		default:
-	    	fprintf(stderr, "usage: ./server [-p port]\n");
+	    	fprintf(stderr, "usage: ./server [-p port] [-t consumer threads]\n");
 	    	exit(1);
 		}
 	}
+	pthread_t ctids[consumer_threads];
+	pthread_mutex_init(&m, NULL);
+	list = createList(compareToItem, toStringItem, freeItem);
 
     // run out of this directory
     chdir(root_dir);
@@ -223,9 +230,14 @@ int main(int argc, char *argv[]) {
 		int client_len = sizeof(client_addr);
 		newsockfd = accept(sockfd, (struct sockaddr *)&client_addr, (socklen_t *) &client_len);
 
-		/* read data from the connection. we have two file descriptors here,
-		 * we use sockfd to listen to the port, and we use newsockfd to actually transfer data. */
-		request_handle(newsockfd);
+		producer(newsockfd);
+
+		for (i = 0; i < consumer_threads; i++) {
+			if (pthread_create(&ctids[i], NULL, &consumer, NULL) != 0) {
+				perror("Failed to create thread");
+			}
+		}
+	
 
 		/* close this one connection */
 		close(newsockfd);
@@ -233,7 +245,7 @@ int main(int argc, char *argv[]) {
 	/* if we ever get here, then close the pipe and don't listen anymore. */
 	close(sockfd);
 
-	return 0;
+return 0;
 }
 
 /* vim: set ts=4: */
