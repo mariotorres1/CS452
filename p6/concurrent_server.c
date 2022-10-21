@@ -128,8 +128,6 @@ void request_handle(int fd) {
 		/* make cgi writes go to socket (not screen), doing so makes sure the cgi output will be displayed to the client. */
 		dup2(fd, STDOUT_FILENO);              
 		/* let the child process run the cgi script */
-		execvp(filename, argv);
-    } else {
 		/* parent just waits for the child to finish */
 		wait(NULL);
     }
@@ -143,17 +141,16 @@ void producer(int fd) {
 	struct node *node;
 
 	pthread_mutex_lock(&m);
-
 	while (list->size >= capacity) {
 		pthread_cond_wait(&c, &m);
 	}
-
 	item = createItem(fd, 1);
 	node = createNode(item);
 
 	addAtRear(list, node);
-	
-	pthread_mutex_unlock(&m);
+
+	pthread_cond_signal(&c);
+    pthread_mutex_unlock(&m);
 
 }
 
@@ -169,8 +166,6 @@ void *consumer(void *ptr) {
 			pthread_cond_wait(&c, &m);
 		}
 		node = removeFront(list);
-		pthread_mutex_unlock(&m);
-
 		if (node) {
 			item = (struct item *)(node->obj);
 			
@@ -179,6 +174,9 @@ void *consumer(void *ptr) {
 
 			freeNode(node, freeItem);
 		}
+		pthread_cond_signal(&c);
+        pthread_mutex_unlock(&m);
+
 		return NULL;
 	}
 }
@@ -233,7 +231,7 @@ int main(int argc, char *argv[]) {
 		producer(newsockfd);
 
 		for (i = 0; i < consumer_threads; i++) {
-			if (pthread_create(&ctids[i], NULL, &consumer, NULL) != 0) {
+			if (pthread_create(&ctids[i], NULL, consumer, NULL) != 0) {
 				perror("Failed to create thread");
 			}
 		}
