@@ -98,7 +98,9 @@ I receive more that likely. I thought about just skipping the project as a whole
 some points are better than none and I'm glad I decided to do that because the material was 
 something I found interesting and it really captured my attention the whole day I was trying 
 to finish the project. The multi=threaded concept is something I still find fascinating and 
-will continue to dive deeper into even after this class is over with.
+will continue to dive deeper into even after this class is over with. I also didn't get a 
+chance to properly comment my code because of the time crunch I was in, so I apologize for 
+that.
 
 ## Sources Used
 
