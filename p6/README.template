@@ -88,21 +88,20 @@ other half on the client terminal like:
 
 ## Reflection and Self Assessment
 
-This project was pretty simple compared to the recent projects we've been working 
-on in this class. It was a nice little change of speed and gave me some time to 
-recharge for the final stretch coming up. I've implemented the mergesort algorithm 
-a couple times in the past couple years which helped me a lot for this project as 
-well. I didn't have to really struggle through any issues implementing this one like 
-I have in the previous projects. It think it was pretty cool to see mergesort run 
-multi threaded, it's the first time I've created anything multi threaded. I've 
-heard of this topic quite a bit the past year or so and to finally be able to work 
-with it was something I enjoyed and hope to be able to work with again in the future. 
-Overall, I enjoyed the project and think I'm getting better as a coder the further 
-we move along this semester. 
+I put myself in a hole with this project because I didn't really start it until the day it 
+was due. I had poor time management and a lot of other work to do so that combination really 
+hurt me here. Even though I didn't perform like I wanted to with this program, I enjoyed the 
+struggles I had and my attempts to fix the issues I was having. The project doesn't seem that 
+hard and I feel I wasn't too far off so I should be able to fix my issues with the feedback 
+I receive more that likely. I thought about just skipping the project as a whole but decided 
+some points are better than none and I'm glad I decided to do that because the material was 
+something I found interesting and it really captured my attention the whole day I was trying 
+to finish the project. The multi=threaded concept is something I still find fascinating and 
+will continue to dive deeper into even after this class is over with.
 
 ## Sources Used
 
 * Class notes 
 * Class whiteboard code 
-* Previous mergesort code I've created
+* Youtube
 * Stackoverflow
