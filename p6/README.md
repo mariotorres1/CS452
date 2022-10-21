@@ -39,6 +39,7 @@ based on how many http requests you want to send):
 ``` console
 $time ./client localhost 8080 /spin.cgi?5
 $time seq 4 | xargs -n 1 -P 4 -I{} ./client localhost 8080 /spin.cgi?5
+```
 
 To run with multi-threaded web server, we need to start the server up (can change the thread 
 value by changing the value 4): 
