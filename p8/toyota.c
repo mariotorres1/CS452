@@ -23,8 +23,11 @@
 
 #include "toyota.h"        /* local definitions */
 
-MODULE_AUTHOR("Jidong Xiao"); /* change this line to your name */
+MODULE_AUTHOR("Mario Torres"); /* change this line to your name */
 MODULE_LICENSE("GPL");
+
+// Variables
+int d;
 
 static int toyota_open (struct inode *inode, struct file *filp);
 static int toyota_release (struct inode *inode, struct file *filp);
@@ -45,8 +48,17 @@ static struct file_operations toyota_fops = {
  * open. if successful, return 0.
  */
 
-static int toyota_open (struct inode *inode, struct file *filp){
-    return 0;          /* success */
+static int toyota_open (struct inode *inode, struct file *filp) {
+    int mn = NUM(inode->i_rdev);
+    
+    if (mn >= 4 || mn < 0) {
+        return -ENODEV;
+    }
+	
+    d = mn;
+	
+    try_module_get(THIS_MODULE);
+    return 0;
 }
 
 /*
