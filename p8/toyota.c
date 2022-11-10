@@ -66,6 +66,8 @@ static int toyota_open (struct inode *inode, struct file *filp) {
  */
 
 static int toyota_release (struct inode *inode, struct file *filp){
+	
+    module_put(THIS_MODULE);
     return 0;
 }
 
