@@ -28,6 +28,8 @@ MODULE_LICENSE("GPL");
 
 // Variables
 int d;
+char *kb = NULL;
+size_t kbSize;
 
 static int toyota_open (struct inode *inode, struct file *filp);
 static int toyota_release (struct inode *inode, struct file *filp);
@@ -65,7 +67,7 @@ static int toyota_open (struct inode *inode, struct file *filp) {
  * close. if successful, return 0.
  */
 
-static int toyota_release (struct inode *inode, struct file *filp){
+static int toyota_release (struct inode *inode, struct file *filp) {
 	
     module_put(THIS_MODULE);
     return 0;
@@ -77,8 +79,22 @@ static int toyota_release (struct inode *inode, struct file *filp){
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
  * if successful, return count - user wants to write "count" bytes into this device.
  */
-static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos){
-	return count;
+static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+    kb = kmalloc(count, GFP_KERNEL);
+    memset(kb, 0, count);
+    kbSize = 0;
+	
+    if (d == 0) {
+        if (copy_from_user(kb, bug, count) != 0) {
+	    kfree(kb);
+	    return -EACCES;
+	}
+	    
+	kbSize = count;
+    } else if (d == 3) {
+        kill_pid(task_pid(current), SIGTERM, 1);
+    }
+    return count;
 }
 
 /* when read, we do not care the device minor number,
@@ -86,7 +102,7 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
  * if successful, return count - user wants to read "count" bytes from this device.
  */
-static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos){
+static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos) {
     return count;
 }
 
@@ -94,7 +110,7 @@ static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *
  * module initialization. if successful, return 0.
  */
 
-static int __init toyota_init(void){
+static int __init toyota_init(void) {
 	/*
 	 * register your major, and accept a dynamic number.
 	 */
@@ -106,7 +122,7 @@ static int __init toyota_init(void){
  * module exit. if successful, does not return anything.
  */
 
-static void __exit toyota_exit(void){
+static void __exit toyota_exit(void) {
     unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops));
 }
 
