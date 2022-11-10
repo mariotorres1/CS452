@@ -99,7 +99,7 @@ static int __init toyota_init(void){
 	 * register your major, and accept a dynamic number.
 	 */
     register_chrdev(0, "toyota", &toyota_fops);
-	return 0;
+    return 0;
 }
 
 /*
@@ -107,6 +107,7 @@ static int __init toyota_init(void){
  */
 
 static void __exit toyota_exit(void){
+    unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops);
 }
 
 module_init(toyota_init);
