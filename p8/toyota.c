@@ -107,7 +107,7 @@ static int __init toyota_init(void){
  */
 
 static void __exit toyota_exit(void){
-    unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops);
+    unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops));
 }
 
 module_init(toyota_init);
