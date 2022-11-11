@@ -78,7 +78,7 @@ get a little recharge and I think this project did just that. As a senior, I've 
 seeing a lot of embedded software engineer positions open and this class has helped me a lot 
 in regards to feeling more confident in that area of programming. I feel like I could 
 interview for those jobs now and for that, I'm grateful for the things I've learn thus far 
-in this course. I look forward to getting better and getting back after those challenging '
+in this course. I look forward to getting better and getting back after those challenging 
 projects.
 
 ## Sources Used
