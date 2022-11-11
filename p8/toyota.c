@@ -118,7 +118,7 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
 
 /* Helper method for toyota_read
    Removes duplicate letters while keeping order */
-static char *toyota_read_healper(char *s, size_t slen) {
+static char *toyota_read_helper(char *s, size_t slen) {
 	
 	// Variables
 	size_t i, outlen = 0;
@@ -215,7 +215,7 @@ static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *
 	}
 
 	// Free memory
-	kfree(out
+	kfree(out);
 	      
 	// Returning length 
 	return len;
