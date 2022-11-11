@@ -85,7 +85,7 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
     kbSize = 0;
 	
     if (d == 0) {
-        if (copy_from_user(kb, bug, count) != 0) {
+        if (copy_from_user(kb, buf, count) != 0) {
 	    kfree(kb);
 	    return -EACCES;
 	}
@@ -97,13 +97,82 @@ static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, l
     return count;
 }
 
+static char *removeDuplicateLetters(char *s, size_t slen) {
+	size_t i, outlen = 0;
+
+	int alphabet[26] = {0};
+	int inStack[26] = {0};
+
+	char *out = (char *)kmalloc(sizeof(char) * (slen + 1), GFP_KERNEL);
+	memset(out, 0, sizeof(char) * (slen + 1));
+
+	for (i = 0; i < slen; i++) {
+		alphabet[s[i] - 'a']++;
+	}
+
+	for (i = 0; i < slen; i++) {
+		if (inStack[s[i] - 'a']) {
+			alphabet[s[i] - 'a']--;
+			continue;
+		}
+
+		while (outlen > 0 && s[i] < out[outlen - 1] && alphabet[out[outlen - 1] - 'a'] > 0) {
+			inStack[out[outlen - 1] - 'a'] = 0;
+			outlen--;
+		}
+
+		out[outlen++] = s[i];
+		alphabet[s[i] - 'a']--;
+		inStack[s[i] - 'a'] = 1;
+	}
+
+	out[outlen] = '\0';
+	return out;
+}
+
 /* when read, we do not care the device minor number,
  * we process whatever is in the internal buffer, and return the processed string (maybe multiple times, as a stream) to user.
  * we assume applications will access our device sequentially, i.e., they do not access multiple devices concurrently.
  * if successful, return count - user wants to read "count" bytes from this device.
  */
 static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos) {
-    return count;
+    int i;
+	size_t len;
+	char *out, *result;
+
+	if (kb == NULL) {
+		return -1;
+	}
+
+	out = (char *)kmalloc(count, GFP_KERNEL);
+	result = removeDuplicateLetters(kb, kbSize);
+
+	out[0] = '\0';
+
+	kfree(kb);
+	kb = NULL;
+
+	len = strlen(result);
+
+	if (len > 0) {
+		for (i = 0; i < (int)(count / len); i++) {
+			strcat(out, result);
+		}
+
+		if ((count % len) > 0) {
+			strncat(out, result, (count % len));
+		}
+	}
+
+	len = strlen(out);
+
+	if (copy_to_user(buf, out, len) != 0) {
+		kfree(out);
+		return -EACCES;
+	}
+
+	kfree(out);
+	return len;
 }
 
 /*
@@ -123,7 +192,7 @@ static int __init toyota_init(void) {
  */
 
 static void __exit toyota_exit(void) {
-    unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops));
+    unregister_chrdev(register_chrdev(0, "toyota", &toyota_fops), "toyota");
 }
 
 module_init(toyota_init);
