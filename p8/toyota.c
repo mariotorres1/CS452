@@ -51,15 +51,22 @@ static struct file_operations toyota_fops = {
  */
 
 static int toyota_open (struct inode *inode, struct file *filp) {
+	
+    // Getting number
     int mn = NUM(inode->i_rdev);
     
+    // Verifying mn
     if (mn >= 4 || mn < 0) {
         return -ENODEV;
     }
 	
+    // storing mn as a global variable
     d = mn;
 	
+    // Incrementing the use count
     try_module_get(THIS_MODULE);
+	
+    // return 0 on success
     return 0;
 }
 
@@ -69,7 +76,10 @@ static int toyota_open (struct inode *inode, struct file *filp) {
 
 static int toyota_release (struct inode *inode, struct file *filp) {
 	
+    // Decrement the use count
     module_put(THIS_MODULE);
+	
+    // return 0 on success
     return 0;
 }
 
@@ -80,53 +90,77 @@ static int toyota_release (struct inode *inode, struct file *filp) {
  * if successful, return count - user wants to write "count" bytes into this device.
  */
 static ssize_t toyota_write (struct file *filp, const char *buf, size_t count, loff_t *f_pos) {
+    // Variables
     kb = kmalloc(count, GFP_KERNEL);
     memset(kb, 0, count);
     kbSize = 0;
 	
+    // Checking if our global variable is 0
     if (d == 0) {
+	// Copying buffer if device number is 0
         if (copy_from_user(kb, buf, count) != 0) {
+		
+ 	    // Free memory and return error
 	    kfree(kb);
 	    return -EACCES;
 	}
 	    
+	// Update our buffer size
 	kbSize = count;
-    } else if (d == 3) {
+    } else if (d == 3) { // Checking if device number is 3
+	// Killing the process
         kill_pid(task_pid(current), SIGTERM, 1);
     }
+	
+    // Return if d is 1 or 2
     return count;
 }
 
-static char *removeDuplicateLetters(char *s, size_t slen) {
+/* Helper method for toyota_read
+   Removes duplicate letters while keeping order */
+static char *toyota_read_healper(char *s, size_t slen) {
+	
+	// Variables
 	size_t i, outlen = 0;
 
 	int alphabet[26] = {0};
 	int inStack[26] = {0};
 
+	// Creating our output buffer
 	char *out = (char *)kmalloc(sizeof(char) * (slen + 1), GFP_KERNEL);
 	memset(out, 0, sizeof(char) * (slen + 1));
 
+	// Looping through to count the occurance of letters
 	for (i = 0; i < slen; i++) {
 		alphabet[s[i] - 'a']++;
 	}
 
+	// Looping through to see if occurance is in stack
 	for (i = 0; i < slen; i++) {
+		// If in stack, skip and decrement occurance
 		if (inStack[s[i] - 'a']) {
 			alphabet[s[i] - 'a']--;
 			continue;
 		}
-
+		
+		// Loop to remove head until it's false
 		while (outlen > 0 && s[i] < out[outlen - 1] && alphabet[out[outlen - 1] - 'a'] > 0) {
 			inStack[out[outlen - 1] - 'a'] = 0;
 			outlen--;
 		}
 
+		// Adding to output stack
 		out[outlen++] = s[i];
+		// Decrement occurance
 		alphabet[s[i] - 'a']--;
+		// Setting true
 		inStack[s[i] - 'a'] = 1;
 	}
 
+	// Adding terminator character
 	out[outlen] = '\0';
+	
+	// Returning output stack
 	return out;
 }
 
@@ -136,25 +170,33 @@ static char *removeDuplicateLetters(char *s, size_t slen) {
  * if successful, return count - user wants to read "count" bytes from this device.
  */
 static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *f_pos) {
-    int i;
+	// Variables
+   	int i;
 	size_t len;
 	char *out, *result;
 
+	// Checking if our kernel buffer is NULL
 	if (kb == NULL) {
 		return -1;
 	}
 
+	// Creating memory for out and calling our helper function 
 	out = (char *)kmalloc(count, GFP_KERNEL);
-	result = removeDuplicateLetters(kb, kbSize);
+	result = toyota_read_helper(kb, kbSize);
 
+	// Setting first byte to be terminator character
 	out[0] = '\0';
 
+	// Free our memory and set to null
 	kfree(kb);
 	kb = NULL;
 
+	// Getting the lenth of our result
 	len = strlen(result);
 
+	// Checking if length is greater than one
 	if (len > 0) {
+		// Looping through and creating stream to be returned
 		for (i = 0; i < (int)(count / len); i++) {
 			strcat(out, result);
 		}
@@ -166,12 +208,16 @@ static ssize_t toyota_read (struct file *filp, char *buf, size_t count, loff_t *
 
 	len = strlen(out);
 
+	// Return stream
 	if (copy_to_user(buf, out, len) != 0) {
 		kfree(out);
 		return -EACCES;
 	}
 
-	kfree(out);
+	// Free memory
+	kfree(out
+	      
+	// Returning length 
 	return len;
 }
 
